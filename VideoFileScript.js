@@ -27,8 +27,10 @@ class Rep{
 
 
 function setup() {
-  createCanvas(iWidth, iHeight);
-  const video = createVideo(['Wo9.MOV']);
+  createCanvas(iWidth * 2, iHeight* 4);
+  video = createVideo(['Wo9.MOV']);
+  video.size(iWidth, iHeight);
+  video.hide(); 
 
   const poseNet = ml5.poseNet(video, modelLoaded);
   poseNet.on('pose', gotPoses);
@@ -45,7 +47,10 @@ function gotPoses(poses) {
 function modelLoaded() {
   //console.log('poseNet ready');
   select('#status').html('Model Loaded Video File Playing');
-  
+}
+
+function mousePressed() {
+  video.loop(); // set the video to loop and start playing
 }
 
 function draw() {
