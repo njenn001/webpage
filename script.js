@@ -1,75 +1,100 @@
-// Copyright (c) 2019 ml5
-//
-// This software is released under the MIT License.
-// https://opensource.org/licenses/MIT
-
-/* ===
-ml5 Example
-PoseNet example using p5.js
-=== */
-
 let video;
 let poseNet;
-let poses = [];
+let pose;
+let skeleton;
+let positions = [];
 
-function setup() {
-  createCanvas(640, 480);
-  video = createCapture(VIDEO);
-  video.size(640, 480);
+var iter = 0;
+var iWidth = 640; 
+var iHeight = 480;
 
-  // Create a new poseNet method with a single detection
-  poseNet = ml5.poseNet(video, modelReady);
-  // This sets up an event that fills the global variable "poses"
-  // with an array every time new poses are detected
-  poseNet.on('pose', function(results) {
-    poses = results;
-  });
-  // Hide the video element, and just show the canvas
-  video.hide();
+class Rep{ 
+  constructor(){
+    this.top = 0; 
+    this.bottoms = []; 
+    this.uROM = 0;
+    this.dROM = 0; 
+    this.uDur = 0; 
+    this.dDur = 0; 
+    this.uVel = 0; 
+    this.dVel = 0; 
+  }
+
+  calcUVel(){
+    return this.ROM / this.duration; 
+  }
 }
 
-function modelReady() {
+function setup() {
+  createCanvas(iWidth, iHeight);
+  video = createCapture(VIDEO);
+  video.hide();
+  poseNet = ml5.poseNet(video, modelLoaded);
+  poseNet.on('pose', gotPoses);
+}
+
+function gotPoses(poses) {
+  //console.log(poses);
+  if (poses.length > 0) {
+    pose = poses[0].pose;
+    skeleton = poses[0].skeleton;
+  }
+}
+
+function modelLoaded() {
+  //console.log('poseNet ready');
   select('#status').html('Model Loaded');
 }
 
 function draw() {
-  image(video, 0, 0, 640, 480);
+  image(video, 0, 0);
 
-  // We can call both functions to draw all keypoints and the skeletons
-  drawKeypoints();
-  drawSkeleton();
-}
+  if (pose) {
+    fill(0, 0, 255);
+    ellipse(pose.rightWrist.x, pose.rightWrist.y, 32);
+    ellipse(pose.leftWrist.x, pose.leftWrist.y, 32);
 
-// A function to draw ellipses over the detected keypoints
-function drawKeypoints()  {
-  // Loop through all the poses detected
-  for (let i = 0; i < poses.length; i++) {
-    // For each pose detected, loop through all the keypoints
-    let pose = poses[i].pose;
-    for (let j = 0; j < pose.keypoints.length; j++) {
-      // A keypoint is an object describing a body part (like rightArm or leftShoulder)
-      let keypoint = pose.keypoints[j];
-      // Only draw an ellipse is the pose probability is bigger than 0.2
-      if (keypoint.score > 0.2) {
-        fill(255, 0, 0);
-        noStroke();
-        ellipse(keypoint.position.x, keypoint.position.y, 10, 10);
+    fill(0, 0, 255);
+    ellipse(pose.rightShoulder.x, pose.rightShoulder.y, 32);
+    ellipse(pose.leftShoulder.x, pose.leftShoulder.y, 32);
+
+    fill(0, 0, 255);
+    ellipse(pose.rightElbow.x, pose.rightElbow.y, 32);
+    ellipse(pose.leftElbow.x, pose.leftElbow.y, 32);
+
+    positions.push(pose.rightWrist.y); 
+    iter = iter + 1; 
+
+    //console.log(pose.rightWrist.y);
+
+    if (positions.length > 5 && iter % 5 == 0){
+      if (positions[positions.length - 5] > positions[positions.length - 3]
+        && positions[positions.length - 3] < positions[positions.length - 1]) {
+
+	console.log(positions[positions.length - 3]);
+	select('#message').html(positions[positions.length - 3]); 
+       	console.log('Top');
+	iter = 0; 
+	
+      	
       }
-    }
-  }
-}
 
-// A function to draw the skeletons
-function drawSkeleton() {
-  // Loop through all the skeletons detected
-  for (let i = 0; i < poses.length; i++) {
-    let skeleton = poses[i].skeleton;
-    // For every skeleton, loop through all body connections
-    for (let j = 0; j < skeleton.length; j++) {
-      let partA = skeleton[j][0];
-      let partB = skeleton[j][1];
-      stroke(255, 0, 0);
-      line(partA.position.x, partA.position.y, partB.position.x, partB.position.y);
     }
+
+
+    /*for (let i = 0; i < pose.keypoints.length; i++) {
+      let x = pose.keypoints[i].position.x;
+      let y = pose.keypoints[i].position.y;
+      fill(0, 255, 0);
+      ellipse(x, y, 16, 16);
+    }
+
+    for (let i = 0; i < skeleton.length; i++) {
+      let a = skeleton[i][0];
+      let b = skeleton[i][1];
+      strokeWeight(2);
+      stroke(255);
+      line(a.position.x, a.position.y, b.position.x, b.position.y);
+    }*/
   }
 }
