@@ -25,11 +25,12 @@ class Rep{
   }
 }
 
+
 function setup() {
   createCanvas(iWidth, iHeight);
-  video = createCapture(VIDEO);
-  video.hide();
-  poseNet = ml5.poseNet(video, modelLoaded);
+  const video = createVideo(['Wo9.MOV']);
+
+  const poseNet = ml5.poseNet(video, modelLoaded);
   poseNet.on('pose', gotPoses);
 }
 
@@ -43,7 +44,8 @@ function gotPoses(poses) {
 
 function modelLoaded() {
   //console.log('poseNet ready');
-  select('#status').html('Model Loaded');
+  select('#status').html('Model Loaded Video File Playing');
+  
 }
 
 function draw() {
@@ -71,14 +73,11 @@ function draw() {
       if (positions[positions.length - 5] > positions[positions.length - 3]
         && positions[positions.length - 3] < positions[positions.length - 1]) {
 
-	console.log(positions[positions.length - 3]);
-	select('#message').html(positions[positions.length - 3]); 
-       	console.log('Top');
-	iter = 0; 
-	
-      	
+        console.log(positions[positions.length - 3]);
+        select('#message').html(positions[positions.length - 3]); 
+        console.log('Top');
+        iter = 0;       	
       }
-
     }
 
 

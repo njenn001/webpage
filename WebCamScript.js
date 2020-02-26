@@ -71,14 +71,11 @@ function draw() {
       if (positions[positions.length - 5] > positions[positions.length - 3]
         && positions[positions.length - 3] < positions[positions.length - 1]) {
 
-	console.log(positions[positions.length - 3]);
-	select('#message').html(positions[positions.length - 3]); 
-       	console.log('Top');
-	iter = 0; 
-	
-      	
+        console.log(positions[positions.length - 3]);
+        select('#message').html(positions[positions.length - 3]); 
+        console.log('Top');
+        iter = 0;       	
       }
-
     }
 
 
