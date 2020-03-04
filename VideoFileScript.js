@@ -28,8 +28,8 @@ class Rep{
 
 function setup() {
   createCanvas(iWidth * 2, iHeight* 4);
-  video = createVideo(['Wo9.MOV']);
-  video.size(iWidth, iHeight);
+  video = createVideo(['Wo19.MOV']);
+  video.size(width, height);
   video.hide(); 
 
   const poseNet = ml5.poseNet(video, modelLoaded);
