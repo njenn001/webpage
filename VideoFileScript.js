@@ -57,17 +57,9 @@ function draw() {
   image(video, 0, 0);
 
   if (pose) {
-    fill(0, 0, 255);
+    fill(0, 255, 0);
     ellipse(pose.rightWrist.x, pose.rightWrist.y, 32);
     ellipse(pose.leftWrist.x, pose.leftWrist.y, 32);
-
-    fill(0, 0, 255);
-    ellipse(pose.rightShoulder.x, pose.rightShoulder.y, 32);
-    ellipse(pose.leftShoulder.x, pose.leftShoulder.y, 32);
-
-    fill(0, 0, 255);
-    ellipse(pose.rightElbow.x, pose.rightElbow.y, 32);
-    ellipse(pose.leftElbow.x, pose.leftElbow.y, 32);
 
     positions.push(pose.rightWrist.y); 
     iter = iter + 1; 
