@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Gaze Tracking Research</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="../style.css">
+
+		<script src="../scripts/fixations.js"></script>
+	</head>
+
+	<style>
+		table, th, td {
+		 	width: 100%;
+		  	border: 1px solid black;
+		  	border-collapse: collapse;
+		  	background-color: white;
+		}
+
+		td, th {
+			width: 50%;
+		  	padding: 15px;
+		  	text-align: left;
+		}
+	</style>
+
+	<body>
+
+		<div class="header">
+		  <h1>Medical Imaging</h1>
+		  <p>Display and analyze image</p>
+		</div>
+
+		<div class="navbar">
+		  <a href="https://www.github.com/njenn001">GitHub</a>
+		  <a href="https://www.linkedin.com/in/noah-jennings-329145187/">LinkedIn</a>
+		  <a href="https://twitter.com/Nej1E">Twitter</a>
+		  <a href="https://www.odu.edu/compsci" class="right">ODU CS</a>
+		</div>
+
+		<div class="row">						
+			<div class="side">
+
+				<div class="container">
+					<h3 align="center">
+						Walkthrough
+					</h3>
+
+					<hr class="rounded" style="width: 50%">
+
+
+					<ol>
+						<div align="left">
+							<li>
+								Open an image using the import button below.
+							</li>
+						</div>
+						<div align="left">
+							<li>
+								Use your mouse to click on the image, signifying the start of a fixation.
+							</li>
+						</div>	
+						<div align="left">
+							<li>
+								Use your mouse to click on the image again to end a fixation and begin the saccade period.
+							</li>
+						</div>	
+						<div align="left">
+							<li>
+								Use the buttons below to enable feedback systems. (COMING SOON)	
+							</li>
+						</div>
+					</ol>
+				</div>
+				<div class="container">
+					<div align="center" style="background-color: white">
+						<input 
+							type="file"
+							name="inpFile" 
+							id="inpFile" 
+							style="color: black; margin: 0px auto; display: block" 
+							onclick="clearFixations()" 
+						/>
+					</div>
+
+					<div class="container" style="background-color: white; border: none" id="tabCont"> 
+						<table class="table">
+							<tr>
+								<th>Attribute</th>
+								<th>Value</th>
+							</tr>
+							<tr>
+								<td>Image Source</td>
+								<td>
+									<p id="src_text">
+										None
+									</p>
+								</td>
+							</tr>
+							<tr>
+								<td>Image Width</td>
+								<td>
+									<p id="w_text">
+										0
+									</p>
+								</td>
+							</tr>
+							<tr>
+								<td>Image Height</td>
+								<td>
+									<p id="h_text">
+										0
+									</p>
+								</td>
+							</tr>
+							<tr>
+								<td>Fixation X Coordinate</td>
+								<td>
+									<p id="fix_x" style="height: 100%">
+										x
+									</p>
+								</td>
+							</tr>
+							<tr>
+								<td>Fixation Y Coordinate</td>
+								<td>
+									<p id="fix_y">
+										y
+									</p>
+								</td>
+							</tr>
+							<tr>
+								<td>Fixation Count</td>
+								<td>
+									<p id="fix_count">
+										0
+									</p>
+								</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+
+			<div class="main" align="center" style="background-color: white; border: none">
+				<div class="container" style="border: none">
+					
+					<canvas id="can" width="400" height="400" style="border:2px solid;">
+
+
+
+					</canvas>
+
+
+					<div class="image-preview" id="imagePreview" align="center" style="height: 90%;" >
+						<img src="" style="height: 50%" alt="Image Preview" class="image-preview__image" id="imgID" onclick="fixate(event)"/>
+						<span class="image-preview__default-text">
+							Image Preview
+						</span>
+					</div>
+					
+				</div>
+			</div>
+			<script>
+				
+				const inpFile = document.getElementById("inpFile");
+
+				const previewContainer = document.getElementById("imagePreview");
+				const previewImage = previewContainer.querySelector(".image-preview__image");
+				const previewDefaultText = previewContainer.querySelector(".image-preview__default-text");
+				const image = document.getElementById("imgID"); 
+				
+				var iWidth = 640; 
+				var iHeight = 480;
+
+
+				function setup() {
+					createCanvas(iWidth * 2, iHeight* 4);
+				}
+
+				function draw() {
+					image ()
+				}
+
+				inpFile.addEventListener("change", function() {
+					const file = this.files[0]; 
+
+					if (file) {
+						const reader = new FileReader(); 
+
+						previewDefaultText.style.display = "none"; 
+						previewImage.style.display = "block"; 
+
+						reader.addEventListener("load", function(){
+							previewImage.setAttribute("src", this.result); 
+
+							document.getElementById("src_text").textContent = file.name; 
+							document.getElementById("w_text").textContent = image.naturalWidth
+							document.getElementById("h_text").textContent = image.naturalHeight; 
+
+							document.getElementById("fix_count").textContent = 0; 
+							document.getElementById("fix_x").textContent = "x";
+							document.getElementById("fix_y").textContent = "y";
+
+
+						});
+
+						reader.readAsDataURL(file); 					
+					}
+					else {
+						previewDefaultText.style.display = null; 
+						previewImage.style.display = null; 
+						previewImage.setAttribute("src", "");
+
+						srcElement.textContent = "None";
+						srcW.textContent = "0"; 
+						srcH.textContent = "0"; 
+					}
+				});
+				
+			</script>
+		</div>
+
+		<div class="footer">
+		 	<h2>Noah Jennings</h2>
+		  	<h3> Old Dominion University</h3>
+		  	<h4>njenn001@odu.edu </h4>
+		  	<h4> Norfolk, VA </h4>
+		</div>
+
+	</body>
+</html>

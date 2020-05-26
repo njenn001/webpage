@@ -49,11 +49,22 @@ body {
   color: white;
 }
 
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+
+td, th {
+  padding: 15px;
+  text-align: left;
+}
+
 .column {
   float:left;
   width: 50%;
   padding: 10px;
   justify-content: center;
+  background-color: #333;
 }
 
 /* Row container */
@@ -90,7 +101,6 @@ body {
   background-color: #333;
   border-style: solid; 
   border-color: #333; 
-  padding: 20px;
 }
 
 /* Container */ 
