@@ -60,6 +60,11 @@ table, th, td {
 td, th {
   padding: 15px;
   text-align: left;
+  font-size: 12px; 
+}
+
+li{ 
+  font-size: 12px; 
 }
 
 .column {
@@ -76,6 +81,7 @@ td, th {
   display: flex;
   -ms-flex-wrap: wrap; /* IE10 */
   flex-wrap: wrap;
+  background-color: #333; 
 }
 
 .row:after {
@@ -87,19 +93,19 @@ td, th {
 /* Create two unequal columns that sits next to each other */
 /* Sidebar/left column */
 .side {
-  -ms-flex: 30%; /* IE10 */
-  flex: 30%; 
+  -ms-flex: 25%; /* IE10 */
+  flex: 25%; 
   background-color: #333;
   margin-top: 0px;
   margin-bottom: 0px;
-  height: 100%;
 }
 
 /* Main column */
 .main {   
-  -ms-flex: 70%; /* IE10 */
-  flex: 70%;
+  -ms-flex: 75%; /* IE10 */
+  flex: 75%;
   background-color: #333;
+  overflow: auto;
 }
 
 /* Container */ 
@@ -128,7 +134,7 @@ hr.rounded {
 .image-preview {
   width: 600px; 
   min-height: 200px;
-  border: 2px solid #333;
+  border: 2px solid #FFFFFF;
   margin-top: 20px;
   margin-bottom: 20px;
 
@@ -165,19 +171,57 @@ hr.rounded {
   margin: 0 auto;
 }
 
-/* Responsive layout - when the screen is less than 700px wide, make the two columns stack on top of each other instead of next to each other */
-@media screen and (max-width: 700px) {
+@media screen and (max-width: 1000px) {
   .row {   
     flex-direction: row;
     float: center; 
-    width: 90%
+    padding: 50px;
+  }
+
+  .side{ 
+    width: 50%; 
+    justify-content: center;
+  }
+
+  .main{ 
+    justify-content: center;
   }
 }
 
-/* Responsive layout - when the screen is less than 400px wide, make the navigation links stack on top of each other instead of next to each other */
 @media screen and (max-width: 400px) {
+  .row {   
+    flex-direction: row;
+    float: center; 
+  }
+
+  .side {
+    flex: 100%; 
+    width: 100%
+  }
+
+  .main{
+    flex: 100%;
+    justify-content: center;
+    width: 100%; 
+  }
+
   .navbar a {
     float: center;
-    width: 90%;
+    width: 100%;
   }
+
+  .navbar b { 
+    float: center; 
+    width: 100%; 
+  }
+
+  .container{
+    overflow: auto; 
+    overflow-y: hidden; 
+    width: 100%; 
+  }
+
+
+
 }
+

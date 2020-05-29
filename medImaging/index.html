@@ -6,7 +6,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<link rel="stylesheet" href="../style.css">
 
-		<script src="../scripts/fixations.js"></script>
+		<script src="../scripts/fixation.js"></script>
 	</head>
 
 	<style>
@@ -21,6 +21,33 @@
 			width: 50%;
 		  	padding: 15px;
 		  	text-align: left;
+		}
+
+
+		.start {
+		  background-color: #4CAF50; /* Green */
+		  border: none;
+		  color: white;
+		  padding: 16px 32px;
+		  text-align: center;
+		  text-decoration: none;
+		  display: inline-block;
+		  font-size: 16px;
+		  transition-duration: 0.4s;
+		  cursor: pointer;
+		}
+
+		.stop {
+		  background-color: #f44336; /* Green */
+		  border: none;
+		  color: white;
+		  padding: 16px 32px;
+		  text-align: center;
+		  text-decoration: none;
+		  display: inline-block;
+		  font-size: 16px;
+		  transition-duration: 0.4s;
+		  cursor: pointer;
 		}
 	</style>
 
@@ -39,6 +66,76 @@
 		</div>
 
 		<div class="row" style="border:none;">						
+			
+			<div class="main" align="center" style="background-color: #333; border: none;">
+				<div class="image-preview" id="imagePreview" align="center" style="border-color: white; width: 90%">
+					<img src="" alt="Image Preview" class="image-preview__image" id="imgID"/>
+					<span class="image-preview__default-text">
+						Image Preview
+					</span>
+
+					<script type="text/javascript">
+
+						var fixes = []; 
+						var clicks = 0; 
+						var startTime = 0; 
+						var endTime = 0; 
+						var x = 0; 
+						var y = 0; 
+
+						var im = document.getElementById("imgID"); 
+						im.onclick = function(event) { 
+						    const canvas = document.getElementById('imgID');   
+						    const rect = canvas.getBoundingClientRect();
+						    const x1 = event.clientX - rect.left;
+						    const y2 = event.clientY - rect.top;
+						  
+						  	if (document.getElementById("start_button").style.display == "none"){
+								clicks++; 
+							}
+
+							//const elem = document.getElementById("sacc_dur");
+						    //const sacc_timer = new Stopwatch(elem, {delay: 10});
+
+						    if (clicks == 1 && document.getElementById("start_button").style.display == "none"){ 
+
+								x = event.clientX - rect.left;
+								y = event.clientY - rect.top;
+
+								document.getElementById("fix_x").textContent = x;
+								document.getElementById("fix_y").textContent = y;
+
+								startTime = new Date(); 
+
+								//sacc_timer.reset(); 
+
+								//console.log(x1 + " " + y2);	
+						    }
+
+							if (clicks == 2 && document.getElementById("start_button").style.display == "none"){
+ 
+								endTime = new Date(); 
+								var duration = ((endTime - startTime) / 1000); 
+
+								var fix = new Fixation(fixes.length, x, y, duration); 
+								fixes.push(fix); 
+
+								document.getElementById("fix_dur").textContent = ((fix.duration) + " seconds"); 
+								document.getElementById("fix_count").textContent = fixes.length; 
+
+								clicks = 0; 
+
+								//sacc_timer.start(); 
+					  
+							}
+
+						}
+
+					</script>
+				</div>
+
+			</div>
+
 			<div class="side" style="padding-top: 0px">
 
 				<div class="container" style="margin-top: 0px;">
@@ -57,17 +154,22 @@
 						</div>
 						<div align="left">
 							<li>
-								Use your mouse to click on the image, signifying the start of a fixation.
+								When you are ready to begin analyzing the image, press the start button. The analysis timer will start. 
+							</li>
+						</div>
+						<div align="left">
+							<li>
+								Fixating, or gazing at an area for a prolonged period of time, is initialized by clicking the mouse on the portion of the image being focused on. 
 							</li>
 						</div>	
 						<div align="left">
 							<li>
-								Use your mouse to click on the image again to end a fixation and begin the saccade period.
+								Saccades, or the periods between fixations, can be initialized by clicking the mouse again, starting the saccade and ending the fixation. 
 							</li>
 						</div>	
 						<div align="left">
 							<li>
-								Use the buttons below to enable feedback systems. (COMING SOON)	
+								Once you are done analyzing the image and intend to make no further fixations, press the stop button. The timers will end and your client will download a CSV file. 
 							</li>
 						</div>
 					</ol>
@@ -79,14 +181,13 @@
 							name="inpFile" 
 							id="inpFile" 
 							style="color: black; margin: 0px auto; display: block" 
-							onclick="clearFixations()" 
 						/>
 					</div>
 
-					<div class="container" style="background-color: white; border: none" id="tabCont"> 
+					<div class="container" style="background-color: white; border: none; padding: 0px; margin: 0px; margin-top: 5px" id="tabCont"> 
 						<table class="table">
 							<tr>
-								<th>Attribute</th>
+								<th style="">Attribute</th>
 								<th>Value</th>
 							</tr>
 							<tr>
@@ -114,6 +215,14 @@
 								</td>
 							</tr>
 							<tr>
+								<td>Analysis Duration</td>
+								<td>
+									<div class="stopwatch" id="im_dur">
+										
+									</div>
+								</td>
+							</tr>
+							<tr>
 								<td>Fixation X Coordinate</td>
 								<td>
 									<p id="fix_x" style="height: 100%">
@@ -137,30 +246,193 @@
 									</p>
 								</td>
 							</tr>
+							</tr>
+							<tr>
+								<td>Fixation Duration</td>
+								<td>
+									<p id="fix_dur">
+										0.000 seconds
+									</p>
+								</td>
+							</tr>
+							<tr>
+								<td>Saccade Duration</td>
+								<td>
+									<div class="stopwatch" id="sacc_dur">
+										
+									</div>
+								</td>
+							</tr>
 						</table>
 					</div>
-				</div>
-			</div>
 
-			<div class="main" align="center" style="background-color: #333; border: none">
-				<div class="container" style="border: none; background-color: #333">
-					
-					<canvas id="can" width="400" height="400" style="border:2px solid;">
+					<div style="background-color: white">
+						<div class="container" align="center" style="border: none" id="buttons">
+							<button class="start" id="start_button" style="display: none; flex: 50%"> 
+								Start
+							</button>
+
+							<button class="stop" id="stop_button" style="display: none; flex: 50%">
+								Stop
+							</button>
+
+							<script type="text/javascript">
 
 
+								var Stopwatch = function(elem, options) {
 
-					</canvas>
+								  var timer       = createTimer(),
+								      startButton = createButton("start", start),
+								      stopButton  = createButton("stop", stop),
+								      resetButton = createButton("reset", reset),
+								      offset,
+								      clock,
+								      interval;
 
+								  // default options
+								  options = options || {};
+								  options.delay = options.delay || 1;
 
-					<div class="image-preview" id="imagePreview" align="center" style="height: 90%;" >
-						<img src="" style="height: 50%" alt="Image Preview" class="image-preview__image" id="imgID" onclick="fixate(event)"/>
-						<span class="image-preview__default-text">
-							Image Preview
-						</span>
+								  // append elements     
+								  elem.appendChild(timer);
+
+								  // initialize
+								  reset();
+
+								  // private functions
+								  function createTimer() {
+								    return document.createElement("span");
+								  }
+
+								  function createButton(action, handler) {
+								    var a = document.createElement("a");
+								    a.href = "#" + action;
+								    a.innerHTML = action;
+								    a.addEventListener("click", function(event) {
+								      handler();
+								      event.preventDefault();
+								    });
+								    return a;
+								  }
+
+								  function start() {
+								    if (!interval) {
+								      offset   = Date.now();
+								      interval = setInterval(update, options.delay);
+								    }
+								  }
+
+								  function stop() {
+								    if (interval) {
+								      clearInterval(interval);
+								      interval = null;
+								    }
+								  }
+
+								  function reset() {
+								    clock = 0;
+								    render();
+								  }
+
+								  function update() {
+								    clock += delta();
+								    render();
+								  }
+
+								  function render() {
+								    timer.innerHTML = ((clock/1000) + " seconds");  
+								  }
+
+								  function delta() {
+								    var now = Date.now(),
+								        d   = now - offset;
+
+								    offset = now;
+								    return d;
+								  }
+
+								  // public API
+								  this.start  = start;
+								  this.stop   = stop;
+								  this.reset  = reset;
+								};
+
+							  	var elem = document.getElementById("im_dur");
+								timer = new Stopwatch(elem, {delay: 10});
+
+								var start_but = document.getElementById("start_button"); 
+								start_but.onclick = function() { 
+
+									  
+									  timer.reset();
+									  timer.start(); 
+
+									  document.getElementById("stop_button").style.display = "block";
+									  document.getElementById("start_button").style.display = "none";
+
+								}
+								 
+								
+								var stop_but = document.getElementById("stop_button"); 
+								stop_but.onclick = function() { 
+
+									document.getElementById("start_button").style.display = "block";
+									document.getElementById("stop_button").style.display = "none";
+									document.getElementById("buttons").style.display = "none";
+									document.getElementById("inpFile").style.display = "block";
+									timer.stop(); 
+
+								    //console.log(fixes);
+
+								    var fix_arr = []; 
+								    var im_arr = []; 
+
+								    im_arr.push(document.getElementById("src_text").textContent);
+								    im_arr.push(document.getElementById("imagePreview").clientWidth);
+								    im_arr.push(document.getElementById("imagePreview").clientHeight);
+
+								    fix_arr.push(im_arr); 
+
+								    for (var i = 0; i < fixes.length; i++){ 
+									    var x_arr = []; 
+								    	
+								    	x_arr.push(fixes[i].id);
+								    	x_arr.push(fixes[i].x);
+								    	x_arr.push(fixes[i].y);
+								    	x_arr.push(fixes[i].duration);
+
+								    	fix_arr.push(x_arr); 
+
+								    	//console.log(x_arr); 
+
+								    }
+
+								    //console.log(fix_arr); 
+
+								    let csvContent = "data:text/csv;charset=utf-8,";
+
+									fix_arr.forEach(function(rowArray) {
+									    let row = rowArray.join(",");
+									    csvContent += row + "\r\n";
+									});
+
+ 									var encodedUri = encodeURI(csvContent);
+									var link = document.createElement("a");
+									link.setAttribute("href", encodedUri);
+									link.setAttribute("download", "out.csv");
+									document.body.appendChild(link); // Required for FF
+
+									link.click();
+								}
+
+								var timer; 
+							
+							</script>
+						</div>
 					</div>
-					
 				</div>
 			</div>
+			
 			<script>
 				
 				const inpFile = document.getElementById("inpFile");
@@ -170,19 +442,7 @@
 				const previewDefaultText = previewContainer.querySelector(".image-preview__default-text");
 				const image = document.getElementById("imgID"); 
 				
-				var iWidth = 640; 
-				var iHeight = 480;
-
-
-				function setup() {
-					createCanvas(iWidth * 2, iHeight* 4);
-				}
-
-				function draw() {
-					image ()
-				}
-
-				inpFile.addEventListener("change", function() {
+				inpFile.addEventListener("input", function() {
 					const file = this.files[0]; 
 
 					if (file) {
@@ -195,15 +455,20 @@
 							previewImage.setAttribute("src", this.result); 
 
 							document.getElementById("src_text").textContent = file.name; 
-							document.getElementById("w_text").textContent = image.naturalWidth
-							document.getElementById("h_text").textContent = image.naturalHeight; 
+							document.getElementById("w_text").textContent = imagePreview.clientWidth;
+							document.getElementById("h_text").textContent = imagePreview.clientHeight; 
 
 							document.getElementById("fix_count").textContent = 0; 
 							document.getElementById("fix_x").textContent = "x";
 							document.getElementById("fix_y").textContent = "y";
+							document.getElementById("fix_dur").textContent = "0.000 seconds";
 
+							document.getElementById("buttons").style.display = "block";
+							document.getElementById("start_button").style.display = "block";
+							document.getElementById("inpFile").style.display = "none"; 
 
 						});
+
 
 						reader.readAsDataURL(file); 					
 					}
@@ -212,13 +477,23 @@
 						previewImage.style.display = null; 
 						previewImage.setAttribute("src", "");
 
-						srcElement.textContent = "None";
-						srcW.textContent = "0"; 
-						srcH.textContent = "0"; 
+						document.getElementById("src_text").textContent = "None";
+						document.getElementById("w_text").textContent = "0"; 
+						document.getElementById("h_text").textContent = "0"; 
+
+						document.getElementById("fix_count").textContent = 0; 
+						document.getElementById("fix_x").textContent = "x";
+						document.getElementById("fix_y").textContent = "y";
+						document.getElementById("fix_dur").textContent = "0.000 seconds";
+
+						document.getElementById("im_dur").textContent = " ";
+						document.getElementById("sacc_dur").textContent = " ";
 					}
 				});
 				
 			</script>
+
+
 		</div>
 
 		<div class="footer">
