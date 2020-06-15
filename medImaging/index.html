@@ -7,6 +7,22 @@
 		<link rel="stylesheet" href="../style.css">
 
 		<script src="../scripts/fixation.js"></script>
+		<!-- Scripts -->
+		<!-- Cornerstone Tools External Dependencies -->
+		<script src="https://unpkg.com/hammerjs@2.0.8/hammer.js"></script>
+
+		<!-- Cornerstone Latest -->
+		<script src="https://unpkg.com/cornerstone-core"></script>
+		<script src="https://unpkg.com/cornerstone-math"></script>
+		<script src="https://unpkg.com/cornerstone-web-image-loader"></script>
+
+		<!-- Cornerstone Tools Latest -->
+		<script src="https://unpkg.com/cornerstone-tools"></script>
+
+		<script>
+		  // TODO: This should happen automatically.
+		  cornerstoneWebImageLoader.external.cornerstone = cornerstone
+		</script>
 	</head>
 
 	<style>
@@ -23,6 +39,13 @@
 		  	text-align: left;
 		}
 
+		.dot {
+			height: 25px;
+			width: 25px;
+			background-color: #bbb;
+			border-radius: 50%;
+			display: inline-block;
+		}
 
 		.start {
 		  background-color: #4CAF50; /* Green */
@@ -49,6 +72,18 @@
 		  transition-duration: 0.4s;
 		  cursor: pointer;
 		}
+
+		.image-canvas-wrapper {
+		  width: 500px;
+		  height: 325px;
+		  margin: 35px auto;
+		  background: black;
+		}
+		
+		.image-canvas {
+		  width: 100%;
+		  height: 100%;
+		}
 	</style>
 
 	<body>
@@ -68,8 +103,10 @@
 		<div class="row" style="border:none;">						
 			
 			<div class="main" align="center" style="background-color: #333; border: none;">
-				<div class="image-preview" id="imagePreview" align="center" style="border-color: white; width: 90%">
-					<img src="" alt="Image Preview" class="image-preview__image" id="imgID"/>
+				<span class="dot" id="status_circle" style="display: none"></span>
+
+				<div class="image-preview" id="imagePreview" align="center" style="border-color: white; width: 90%;">
+					<img src="" alt="Image Preview" class="image-preview__image" id="imgID" style="cursor: not-allowed;" />
 					<span class="image-preview__default-text">
 						Image Preview
 					</span>
@@ -94,38 +131,33 @@
 								clicks++; 
 							}
 
-							//const elem = document.getElementById("sacc_dur");
-						    //const sacc_timer = new Stopwatch(elem, {delay: 10});
-
 						    if (clicks == 1 && document.getElementById("start_button").style.display == "none"){ 
 
 								x = event.clientX - rect.left;
 								y = event.clientY - rect.top;
 
+								document.getElementById("imgID").style.cursor = "auto";
 								document.getElementById("fix_x").textContent = x;
 								document.getElementById("fix_y").textContent = y;
+								document.getElementById("status_circle").style.backgroundColor = "#f44336";  
 
 								startTime = new Date(); 
-
-								//sacc_timer.reset(); 
-
-								//console.log(x1 + " " + y2);	
 						    }
 
 							if (clicks == 2 && document.getElementById("start_button").style.display == "none"){
- 
+
 								endTime = new Date(); 
 								var duration = ((endTime - startTime) / 1000); 
 
 								var fix = new Fixation(fixes.length, x, y, duration); 
 								fixes.push(fix); 
 
+								document.getElementById("imgID").style.cursor = "cell"; 
 								document.getElementById("fix_dur").textContent = ((fix.duration) + " seconds"); 
 								document.getElementById("fix_count").textContent = fixes.length; 
+								document.getElementById("status_circle").style.backgroundColor = "#4CAF50"; 
 
 								clicks = 0; 
-
-								//sacc_timer.start(); 
 					  
 							}
 
@@ -364,22 +396,27 @@
 								start_but.onclick = function() { 
 
 									  
-									  timer.reset();
-									  timer.start(); 
+									timer.reset();
+									timer.start(); 
 
-									  document.getElementById("stop_button").style.display = "block";
-									  document.getElementById("start_button").style.display = "none";
-
+									document.getElementById("stop_button").style.display = "block";
+									document.getElementById("start_button").style.display = "none";
+									document.getElementById("imgID").style.cursor = "cell"; 
+									document.getElementById("status_circle").style.display = "block";
+   								    document.getElementById("status_circle").style.backgroundColor = "#4CAF50"
 								}
 								 
 								
 								var stop_but = document.getElementById("stop_button"); 
 								stop_but.onclick = function() { 
 
+									document.getElementById("imgID").style.cursor = "auto"; 
 									document.getElementById("start_button").style.display = "block";
 									document.getElementById("stop_button").style.display = "none";
 									document.getElementById("buttons").style.display = "none";
 									document.getElementById("inpFile").style.display = "block";
+									document.getElementById("status_circle").style.display = "none";
+
 									timer.stop(); 
 
 								    //console.log(fixes);
@@ -466,9 +503,7 @@
 							document.getElementById("buttons").style.display = "block";
 							document.getElementById("start_button").style.display = "block";
 							document.getElementById("inpFile").style.display = "none"; 
-
 						});
-
 
 						reader.readAsDataURL(file); 					
 					}
@@ -488,7 +523,11 @@
 
 						document.getElementById("im_dur").textContent = " ";
 						document.getElementById("sacc_dur").textContent = " ";
-					}
+
+						document.getElementById("buttons").style.display = "none";
+						document.getElementById("inpFile").style.display = "block"; 
+						document.getElementById("status_circle").style.display = "none";
+				}
 				});
 				
 			</script>
