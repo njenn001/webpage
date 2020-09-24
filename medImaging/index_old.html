@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Gaze Tracking Research</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="../style.css">
+
+		<script src="../scripts/fixation.js"></script>
+		<!-- Scripts -->
+		<!-- Cornerstone Tools External Dependencies -->
+		<script src="https://unpkg.com/hammerjs@2.0.8/hammer.js"></script>
+
+		<!-- Cornerstone Latest -->
+		<script src="https://unpkg.com/cornerstone-core"></script>
+		<script src="https://unpkg.com/cornerstone-math"></script>
+		<script src="https://unpkg.com/cornerstone-web-image-loader"></script>
+
+		<!-- Cornerstone Tools Latest -->
+		<script src="https://unpkg.com/cornerstone-tools"></script>
+
+		<script>
+		  // TODO: This should happen automatically.
+		  cornerstoneWebImageLoader.external.cornerstone = cornerstone
+		</script>
+	</head>
+
+	<style>
+		table, th, td {
+		 	width: 100%;
+		  	border: 1px solid black;
+		  	border-collapse: collapse;
+		  	background-color: white;
+		}
+
+		td, th {
+			width: 50%;
+		  	padding: 15px;
+		  	text-align: left;
+		}
+
+		.dot {
+			height: 25px;
+			width: 25px;
+			background-color: #bbb;
+			border-radius: 50%;
+			display: inline-block;
+		}
+
+		.start {
+		  background-color: #4CAF50; /* Green */
+		  border: none;
+		  color: white;
+		  padding: 16px 32px;
+		  text-align: center;
+		  text-decoration: none;
+		  display: inline-block;
+		  font-size: 16px;
+		  transition-duration: 0.4s;
+		  cursor: pointer;
+		}
+
+		.stop {
+		  background-color: #f44336; /* Green */
+		  border: none;
+		  color: white;
+		  padding: 16px 32px;
+		  text-align: center;
+		  text-decoration: none;
+		  display: inline-block;
+		  font-size: 16px;
+		  transition-duration: 0.4s;
+		  cursor: pointer;
+		}
+
+		.image-canvas-wrapper {
+		  width: 500px;
+		  height: 325px;
+		  margin: 35px auto;
+		  background: black;
+		}
+		
+		.image-canvas {
+		  width: 100%;
+		  height: 100%;
+		}
+
+		/* Layers */
+		.layerContainer {
+		    position: relative; padding: 0;
+		    margin: auto; text-align: center; }
+		.imageLayer {
+		    position: absolute;
+		    left: 0px; }
+
+		/* drag&drop */
+		.dropBox {}
+		.dropBoxBorder {
+		    margin: 20px auto;
+		    border: 5px dashed #ccc; }
+		.dropBoxBorder.hover {
+		    margin: 20px auto;
+		    border: 5px dashed #cc0; }
+
+		.legend {
+		  text-align: center;
+		  font-size: 8pt;
+		  margin: 1em;
+		}
+		.legend a {
+		    color: #ccc;
+		}
+
+
+	</style>
+
+	<body>
+
+		<div class="header">
+		  <h1>Medical Imaging</h1>
+		  <p>Display and analyze image</p>
+		</div>
+
+		<div class="navbar">
+		  <a href="https://www.github.com/njenn001">GitHub</a>
+		  <a href="https://www.linkedin.com/in/noah-jennings-329145187/">LinkedIn</a>
+		  <a href="https://twitter.com/Nej1E">Twitter</a>
+		  <a href="https://www.cs.odu.edu/~njenning" class="right">Home</a>
+		</div>
+
+		<div class="row" style="border:none;">						
+			
+			<div class="main" align="center" style="background-color: #333; border: none;">
+				<span class="dot" id="status_circle" style="display: none"></span>
+
+				<div class="image-preview" id="imagePreview" align="center" style="border-color: white; width: 90%;">
+					<img src="" alt="Image Preview" class="image-preview__image" id="imgID" style="cursor: not-allowed;" />
+					<span class="image-preview__default-text">
+						Image Preview
+					</span>
+
+					<script type="text/javascript">
+
+						var fixes = []; 
+						var clicks = 0; 
+						var startTime = 0; 
+						var endTime = 0; 
+						var x = 0; 
+						var y = 0; 
+
+						var im = document.getElementById("imgID"); 
+						im.onclick = function(event) { 
+						    const canvas = document.getElementById('imgID');   
+						    const rect = canvas.getBoundingClientRect();
+						    const x1 = event.clientX - rect.left;
+						    const y2 = event.clientY - rect.top;
+						  
+						  	if (document.getElementById("start_button").style.display == "none"){
+								clicks++; 
+							}
+
+						    if (clicks == 1 && document.getElementById("start_button").style.display == "none"){ 
+
+								x = event.clientX - rect.left;
+								y = event.clientY - rect.top;
+
+								document.getElementById("imgID").style.cursor = "auto";
+								document.getElementById("fix_x").textContent = x;
+								document.getElementById("fix_y").textContent = y;
+								document.getElementById("status_circle").style.backgroundColor = "#f44336";  
+
+								startTime = new Date(); 
+						    }
+
+							if (clicks == 2 && document.getElementById("start_button").style.display == "none"){
+
+								endTime = new Date(); 
+								var duration = ((endTime - startTime) / 1000); 
+
+								var fix = new Fixation(fixes.length, x, y, duration); 
+								fixes.push(fix); 
+
+								document.getElementById("imgID").style.cursor = "cell"; 
+								document.getElementById("fix_dur").textContent = ((fix.duration) + " seconds"); 
+								document.getElementById("fix_count").textContent = fixes.length; 
+								document.getElementById("status_circle").style.backgroundColor = "#4CAF50"; 
+
+								clicks = 0; 
+					  
+							}
+
+						}
+
+					</script>
+				</div>
+
+			</div>
+
+			<div class="side" style="padding-top: 0px">
+
+				<div class="container" style="margin-top: 0px;">
+					<h3 align="center">
+						Walkthrough
+					</h3>
+
+					<hr class="rounded" style="width: 50%">
+
+
+					<ol>
+						<div align="left">
+							<li>
+								Open an image using the import button below.
+							</li>
+						</div>
+						<div align="left">
+							<li>
+								When you are ready to begin analyzing the image, press the start button. The analysis timer will start and you can then begin making fixations. 
+							</li>
+						</div>
+						<div align="left">
+							<li>
+								Fixating, or gazing at an area for a prolonged period of time, is initialized by holding the mouse on the portion of the image being focused on and pressing the 'F' key. 
+							</li>
+						</div>	
+						<div align="left">
+							<li>
+								Saccades, or the periods between fixations, can be initialized pressing the 'F' key again, starting the saccade and ending the fixation. 
+							</li>
+						</div>	
+						<div align="left">
+							<li>
+								Once you are done analyzing the image and intend to make no further fixations, press the stop button. The timers will end and your client will download a CSV file representing the session. 
+							</li>
+						</div>
+					</ol>
+				</div>
+				<div class="container">
+					<div align="center" style="background-color: white">
+						<input 
+							type="file"
+							name="inpFile" 
+							id="inpFile" 
+							style="color: black; margin: 0px auto; display: block" 
+						/>
+					</div>
+
+					<div class="container" style="background-color: white; border: none; padding: 0px; margin: 0px; margin-top: 5px" id="tabCont"> 
+						<table class="table">
+							<tr>
+								<th style="">Attribute</th>
+								<th>Value</th>
+							</tr>
+							<tr>
+								<td>Image Source</td>
+								<td>
+									<p id="src_text">
+										None
+									</p>
+								</td>
+							</tr>
+							<tr>
+								<td>Image Width</td>
+								<td>
+									<p id="w_text">
+										0
+									</p>
+								</td>
+							</tr>
+							<tr>
+								<td>Image Height</td>
+								<td>
+									<p id="h_text">
+										0
+									</p>
+								</td>
+							</tr>
+							<tr>
+								<td>Analysis Duration</td>
+								<td>
+									<div class="stopwatch" id="im_dur">
+										
+									</div>
+								</td>
+							</tr>
+							<tr>
+								<td>Fixation X Coordinate</td>
+								<td>
+									<p id="fix_x" style="height: 100%">
+										x
+									</p>
+								</td>
+							</tr>
+							<tr>
+								<td>Fixation Y Coordinate</td>
+								<td>
+									<p id="fix_y">
+										y
+									</p>
+								</td>
+							</tr>
+							<tr>
+								<td>Fixation Count</td>
+								<td>
+									<p id="fix_count">
+										0
+									</p>
+								</td>
+							</tr>
+							</tr>
+							<tr>
+								<td>Fixation Duration</td>
+								<td>
+									<p id="fix_dur">
+										0.000 seconds
+									</p>
+								</td>
+							</tr>
+							<tr>
+								<td>Saccade Duration</td>
+								<td>
+									<div class="stopwatch" id="sacc_dur">
+										
+									</div>
+								</td>
+							</tr>
+						</table>
+					</div>
+
+					<div style="background-color: white">
+						<div class="container" align="center" style="border: none" id="buttons">
+							<button class="start" id="start_button" style="display: none; flex: 50%"> 
+								Start
+							</button>
+
+							<button class="stop" id="stop_button" style="display: none; flex: 50%">
+								Stop
+							</button>
+
+							<script type="text/javascript">
+
+
+								var Stopwatch = function(elem, options) {
+
+								  var timer       = createTimer(),
+								      startButton = createButton("start", start),
+								      stopButton  = createButton("stop", stop),
+								      resetButton = createButton("reset", reset),
+								      offset,
+								      clock,
+								      interval;
+
+								  // default options
+								  options = options || {};
+								  options.delay = options.delay || 1;
+
+								  // append elements     
+								  elem.appendChild(timer);
+
+								  // initialize
+								  reset();
+
+								  // private functions
+								  function createTimer() {
+								    return document.createElement("span");
+								  }
+
+								  function createButton(action, handler) {
+								    var a = document.createElement("a");
+								    a.href = "#" + action;
+								    a.innerHTML = action;
+								    a.addEventListener("click", function(event) {
+								      handler();
+								      event.preventDefault();
+								    });
+								    return a;
+								  }
+
+								  function start() {
+								    if (!interval) {
+								      offset   = Date.now();
+								      interval = setInterval(update, options.delay);
+								    }
+								  }
+
+								  function stop() {
+								    if (interval) {
+								      clearInterval(interval);
+								      interval = null;
+								    }
+								  }
+
+								  function reset() {
+								    clock = 0;
+								    render();
+								  }
+
+								  function update() {
+								    clock += delta();
+								    render();
+								  }
+
+								  function render() {
+								    timer.innerHTML = ((clock/1000) + " seconds");  
+								  }
+
+								  function delta() {
+								    var now = Date.now(),
+								        d   = now - offset;
+
+								    offset = now;
+								    return d;
+								  }
+
+								  // public API
+								  this.start  = start;
+								  this.stop   = stop;
+								  this.reset  = reset;
+								};
+
+							  	var elem = document.getElementById("im_dur");
+								timer = new Stopwatch(elem, {delay: 10});
+
+								var start_but = document.getElementById("start_button"); 
+								start_but.onclick = function() { 
+
+									  
+									timer.reset();
+									timer.start(); 
+
+									document.getElementById("stop_button").style.display = "block";
+									document.getElementById("start_button").style.display = "none";
+									document.getElementById("imgID").style.cursor = "cell"; 
+									document.getElementById("status_circle").style.display = "block";
+   								    document.getElementById("status_circle").style.backgroundColor = "#4CAF50"
+								}
+								 
+								
+								var stop_but = document.getElementById("stop_button"); 
+								stop_but.onclick = function() { 
+
+									document.getElementById("imgID").style.cursor = "auto"; 
+									document.getElementById("start_button").style.display = "block";
+									document.getElementById("stop_button").style.display = "none";
+									document.getElementById("buttons").style.display = "none";
+									document.getElementById("inpFile").style.display = "block";
+									document.getElementById("status_circle").style.display = "none";
+
+									timer.stop(); 
+
+								    //console.log(fixes);
+
+								    var fix_arr = []; 
+								    var im_arr = []; 
+
+								    im_arr.push(document.getElementById("src_text").textContent);
+								    im_arr.push(document.getElementById("imagePreview").clientWidth);
+								    im_arr.push(document.getElementById("imagePreview").clientHeight);
+
+								    fix_arr.push(im_arr); 
+
+								    for (var i = 0; i < fixes.length; i++){ 
+									    var x_arr = []; 
+								    	
+								    	x_arr.push(fixes[i].id);
+								    	x_arr.push(fixes[i].x);
+								    	x_arr.push(fixes[i].y);
+								    	x_arr.push(fixes[i].duration);
+
+								    	fix_arr.push(x_arr); 
+
+								    	//console.log(x_arr); 
+
+								    }
+
+								    //console.log(fix_arr); 
+
+								    let csvContent = "data:text/csv;charset=utf-8,";
+
+									fix_arr.forEach(function(rowArray) {
+									    let row = rowArray.join(",");
+									    csvContent += row + "\r\n";
+									});
+
+ 									var encodedUri = encodeURI(csvContent);
+									var link = document.createElement("a");
+									link.setAttribute("href", encodedUri);
+									link.setAttribute("download", "out.csv");
+									document.body.appendChild(link); // Required for FF
+
+									link.click();
+								}
+
+								var timer; 
+							
+							</script>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<script>
+				
+				const inpFile = document.getElementById("inpFile");
+
+				const previewContainer = document.getElementById("imagePreview");
+				const previewImage = previewContainer.querySelector(".image-preview__image");
+				const previewDefaultText = previewContainer.querySelector(".image-preview__default-text");
+				const image = document.getElementById("imgID"); 
+				
+				inpFile.addEventListener("input", function() {
+					const file = this.files[0]; 
+
+					if (file) {
+						const reader = new FileReader(); 
+
+						previewDefaultText.style.display = "none"; 
+						previewImage.style.display = "block"; 
+
+						reader.addEventListener("load", function(){
+							previewImage.setAttribute("src", this.result); 
+
+							document.getElementById("src_text").textContent = file.name; 
+							document.getElementById("w_text").textContent = imagePreview.clientWidth;
+							document.getElementById("h_text").textContent = imagePreview.clientHeight; 
+
+							document.getElementById("fix_count").textContent = 0; 
+							document.getElementById("fix_x").textContent = "x";
+							document.getElementById("fix_y").textContent = "y";
+							document.getElementById("fix_dur").textContent = "0.000 seconds";
+
+							document.getElementById("buttons").style.display = "block";
+							document.getElementById("start_button").style.display = "block";
+							document.getElementById("inpFile").style.display = "none"; 
+						});
+
+						reader.readAsDataURL(file); 					
+					}
+					else {
+						previewDefaultText.style.display = null; 
+						previewImage.style.display = null; 
+						previewImage.setAttribute("src", "");
+
+						document.getElementById("src_text").textContent = "None";
+						document.getElementById("w_text").textContent = "0"; 
+						document.getElementById("h_text").textContent = "0"; 
+
+						document.getElementById("fix_count").textContent = 0; 
+						document.getElementById("fix_x").textContent = "x";
+						document.getElementById("fix_y").textContent = "y";
+						document.getElementById("fix_dur").textContent = "0.000 seconds";
+
+						document.getElementById("im_dur").textContent = " ";
+						document.getElementById("sacc_dur").textContent = " ";
+
+						document.getElementById("buttons").style.display = "none";
+						document.getElementById("inpFile").style.display = "block"; 
+						document.getElementById("status_circle").style.display = "none";
+				}
+				});
+				
+			</script>
+
+
+		</div>
+
+		<div class="footer">
+		 	<h2>Noah Jennings</h2>
+		  	<h3> Old Dominion University</h3>
+		  	<h4>njenn001@odu.edu </h4>
+		  	<h4> Norfolk, VA </h4>
+		</div>
+
+	</body>
+</html>
